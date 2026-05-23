@@ -77,7 +77,14 @@ export default function PollVoteModal({ poll, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[75] flex items-center justify-center bg-slate-950/55 px-4 py-4 backdrop-blur-sm md:py-6">
-      <div className="vote-modal-panel max-h-[82dvh] overflow-x-hidden overflow-y-auto overscroll-contain rounded-[1.5rem] bg-white p-3.5 shadow-glow md:max-h-[92vh] md:rounded-[2rem] md:p-6">
+      <div
+        className="max-h-[82dvh] overflow-x-hidden overflow-y-auto overscroll-contain rounded-[1.5rem] bg-white p-3.5 shadow-glow md:max-h-[92vh] md:rounded-[2rem] md:p-6"
+        style={{
+          boxSizing: 'border-box',
+          width: 'min(20.5rem, calc(100vw - 2rem))',
+          maxWidth: 'min(20.5rem, calc(100vw - 2rem))',
+        }}
+      >
         <div className="mb-4 flex items-start justify-between gap-3 md:mb-5 md:gap-4">
           <div className="min-w-0">
             <div className="mb-2 flex flex-wrap gap-2">
