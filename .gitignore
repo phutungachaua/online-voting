@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Firebase / secrets
+serviceAccountKey.json
+firebase-debug.log
+firestore-debug.log
+*.log
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Vite / tooling cache
+.vite/
+coverage/

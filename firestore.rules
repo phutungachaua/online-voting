@@ -1,0 +1,126 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userPath(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(userPath(request.auth.uid))
+        && get(userPath(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function validPollType() {
+      return request.resource.data.type in ['vote', 'score10', 'score100'];
+    }
+
+    function validPollStatus() {
+      return request.resource.data.status in ['active', 'closed'];
+    }
+
+    function validPollShape() {
+      return request.resource.data.keys().hasAll(['title', 'description', 'type', 'options', 'status', 'createdBy', 'updatedAt'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.description is string
+        && request.resource.data.options is list
+        && validPollType()
+        && validPollStatus();
+    }
+
+    function validPollOptions() {
+      return (request.resource.data.type == 'vote' && request.resource.data.options.size() >= 2)
+        || (request.resource.data.type in ['score10', 'score100']);
+    }
+
+    function validPollCreate() {
+      return validPollShape()
+        && request.resource.data.keys().hasAll(['createdAt'])
+        && request.resource.data.createdBy == request.auth.uid
+        && validPollOptions();
+    }
+
+    function validPollUpdate() {
+      return validPollShape()
+        && request.resource.data.createdBy == resource.data.createdBy
+        && validPollOptions();
+    }
+
+    function pollIsActive(pollId) {
+      return get(/databases/$(database)/documents/polls/$(pollId)).data.status == 'active';
+    }
+
+    function pollType(pollId) {
+      return get(/databases/$(database)/documents/polls/$(pollId)).data.type;
+    }
+
+    function validChoiceVote(pollId, uid) {
+      return pollType(pollId) == 'vote'
+        && request.resource.data.keys().hasAll(['userId', 'type', 'optionId', 'createdAt', 'updatedAt'])
+        && request.resource.data.userId == uid
+        && request.resource.data.type == 'vote'
+        && request.resource.data.optionId is string
+        && request.resource.data.optionId.size() > 0;
+    }
+
+    function validScore10(uid) {
+      return request.resource.data.keys().hasAll(['userId', 'type', 'score', 'createdAt', 'updatedAt'])
+        && request.resource.data.userId == uid
+        && request.resource.data.type == 'score10'
+        && (request.resource.data.score is int || request.resource.data.score is float)
+        && request.resource.data.score >= 1
+        && request.resource.data.score <= 10;
+    }
+
+    function validScore100(uid) {
+      return request.resource.data.keys().hasAll(['userId', 'type', 'score', 'createdAt', 'updatedAt'])
+        && request.resource.data.userId == uid
+        && request.resource.data.type == 'score100'
+        && (request.resource.data.score is int || request.resource.data.score is float)
+        && request.resource.data.score >= 1
+        && request.resource.data.score <= 100;
+    }
+
+    function validScoreVote(pollId, uid) {
+      return (pollType(pollId) == 'score10' && validScore10(uid))
+        || (pollType(pollId) == 'score100' && validScore100(uid));
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId)
+        && request.resource.data.role == 'user';
+      allow update: if isAdmin()
+        || (isOwner(userId)
+          && request.resource.data.role == resource.data.role
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly(['email', 'displayName', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+
+    match /polls/{pollId} {
+      allow read: if signedIn();
+      allow create: if isAdmin() && validPollCreate();
+      allow update: if isAdmin() && validPollUpdate();
+      allow delete: if isAdmin();
+
+      match /votes/{uid} {
+        allow read: if isAdmin() || isOwner(uid);
+        allow create: if isOwner(uid)
+          && !isAdmin()
+          && pollIsActive(pollId)
+          && (validChoiceVote(pollId, uid) || validScoreVote(pollId, uid));
+        allow update, delete: if false;
+      }
+    }
+  }
+}
