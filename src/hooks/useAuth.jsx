@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { listenAuthState } from '../services/authService';
+import { clearCurrentSession, getCurrentSessionId, listenAuthState, listenUserSession, logout } from '../services/authService';
 
 const AuthContext = createContext({ user: null, loading: true });
 
@@ -15,6 +15,41 @@ export function AuthProvider({ children }) {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (!user) return undefined;
+
+    let ignoreFirstEmptySession = true;
+    const unsubscribe = listenUserSession(user.uid, async (activeSessionId) => {
+      const currentSessionId = getCurrentSessionId();
+
+      if (!currentSessionId) {
+        if (ignoreFirstEmptySession) {
+          ignoreFirstEmptySession = false;
+          window.setTimeout(async () => {
+            if (!getCurrentSessionId()) {
+              clearCurrentSession();
+              await logout();
+            }
+          }, 1000);
+          return;
+        }
+        clearCurrentSession();
+        await logout();
+        return;
+      }
+
+      if (activeSessionId && activeSessionId !== currentSessionId) {
+        clearCurrentSession();
+        await logout();
+      }
+    }, async () => {
+      clearCurrentSession();
+      await logout();
+    });
+
+    return unsubscribe;
+  }, [user]);
 
   const value = useMemo(() => ({ user, loading }), [user, loading]);
 
