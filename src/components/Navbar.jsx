@@ -1,4 +1,4 @@
-import { Home, LogOut, Menu, Shield, Vote } from 'lucide-react';
+import { Home, LogOut, Megaphone, Menu, Shield, Vote } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import logo from '../../logo-AC.png';
@@ -37,7 +37,12 @@ export default function Navbar() {
 
         <nav className="hidden items-center gap-2 md:flex">
           <NavLink end to="/" className={linkClass}><span className="inline-flex items-center gap-2"><Home size={16} />Trang chủ</span></NavLink>
-          <NavLink to="/polls" className={linkClass}><span className="inline-flex items-center gap-2"><Vote size={16} />Bình chọn</span></NavLink>
+          <NavLink to="/polls" className={linkClass}>
+            <span className="inline-flex items-center gap-2">
+              {isAdmin ? <Megaphone size={16} /> : <Vote size={16} />}
+              {isAdmin ? 'Công bố' : 'Bình chọn'}
+            </span>
+          </NavLink>
           {isAdmin && <NavLink to="/admin" className={linkClass}><span className="inline-flex items-center gap-2"><Shield size={16} />Quản trị bình chọn</span></NavLink>}
         </nav>
 
@@ -75,7 +80,7 @@ export default function Navbar() {
         <div className="border-t border-slate-100 bg-white px-4 py-3 md:hidden">
           <div className="flex flex-col gap-2">
             <NavLink end to="/" className={linkClass}>Trang chủ</NavLink>
-            <NavLink to="/polls" className={linkClass}>Bình chọn</NavLink>
+            <NavLink to="/polls" className={linkClass}>{isAdmin ? 'Công bố' : 'Bình chọn'}</NavLink>
             {isAdmin && <NavLink to="/admin" className={linkClass}>Quản trị bình chọn</NavLink>}
           </div>
         </div>

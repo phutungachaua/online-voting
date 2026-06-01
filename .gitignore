@@ -15,6 +15,7 @@ serviceAccountKey.json
 firebase-debug.log
 firestore-debug.log
 *.log
+tmp-users-import.json
 
 # Editor / OS
 .DS_Store

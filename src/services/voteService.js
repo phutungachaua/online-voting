@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocsFromServer, onSnapshot, serverTimestamp, setDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 export const listenVotes = (pollId, callback, onError) => {
@@ -31,4 +31,25 @@ export const submitVote = async (pollId, userId, payload) => {
 export const getUserVote = async (pollId, userId) => {
   const snapshot = await getDoc(doc(db, 'polls', pollId, 'votes', userId));
   return snapshot.exists() ? { id: snapshot.id, ...snapshot.data() } : null;
+};
+
+export const resetPollVotes = async (pollId) => {
+  const votesRef = collection(db, 'polls', pollId, 'votes');
+  const votesSnapshot = await getDocsFromServer(votesRef);
+  const docs = votesSnapshot.docs;
+
+  for (let index = 0; index < docs.length; index += 500) {
+    const batch = writeBatch(db);
+    docs.slice(index, index + 500).forEach((voteDoc) => {
+      batch.delete(voteDoc.ref);
+    });
+    await batch.commit();
+  }
+
+  const remainingSnapshot = await getDocsFromServer(votesRef);
+  if (!remainingSnapshot.empty) {
+    throw new Error(`Reset chưa hoàn tất, vẫn còn ${remainingSnapshot.size} lượt gửi trên Firestore.`);
+  }
+
+  return docs.length;
 };

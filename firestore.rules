@@ -119,7 +119,8 @@ service cloud.firestore {
           && !isAdmin()
           && pollIsActive(pollId)
           && (validChoiceVote(pollId, uid) || validScoreVote(pollId, uid));
-        allow update, delete: if false;
+        allow update: if false;
+        allow delete: if isAdmin();
       }
     }
   }

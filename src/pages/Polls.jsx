@@ -9,6 +9,7 @@ import { useAuth } from '../hooks/useAuth';
 import { usePolls } from '../hooks/usePolls';
 import { useUserRole } from '../hooks/useUserRole';
 import { useUserPollVotes } from '../hooks/useVotes';
+import AdminPublish from './AdminPublish';
 
 export default function Polls() {
   const { user, loading: authLoading } = useAuth();
@@ -34,6 +35,10 @@ export default function Polls() {
   }, [location.pathname, isAdmin]);
 
   const canOpenVoteModal = Boolean(user) && !isAdmin && !roleLoading;
+
+  if (!authLoading && user && !roleLoading && isAdmin) {
+    return <AdminPublish />;
+  }
 
   return (
     <section className="festival-stage relative min-h-[calc(100vh-76px)] overflow-hidden">
