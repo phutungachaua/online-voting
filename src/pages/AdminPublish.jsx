@@ -35,6 +35,29 @@ const weightedTotal = ({ audienceScore, bgkScore, kmScore }) => (
   Number((audienceScore * 0.6 + bgkScore * 0.2 + kmScore * 0.2).toFixed(1))
 );
 
+const trophyImageUrl = 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Trophy/3D/trophy_3d.png';
+
+const rankCupStyles = [
+  {
+    label: 'Nhất',
+    className: 'bg-amber-50 ring-1 ring-amber-100',
+    imageClassName: 'h-12 w-12',
+    imageStyle: {},
+  },
+  {
+    label: 'Nhì',
+    className: 'bg-slate-100 ring-1 ring-slate-200',
+    imageClassName: 'h-10 w-10',
+    imageStyle: { filter: 'grayscale(1) saturate(0.25) brightness(1.22) contrast(0.92)' },
+  },
+  {
+    label: 'Ba',
+    className: 'bg-orange-50 ring-1 ring-orange-100',
+    imageClassName: 'h-9 w-9',
+    imageStyle: { filter: 'sepia(0.7) saturate(1.6) hue-rotate(330deg) brightness(0.9)' },
+  },
+];
+
 export default function AdminPublish() {
   const { toast } = useToast();
   const { polls, loading, error } = usePolls(true);
@@ -188,22 +211,33 @@ export default function AdminPublish() {
             </div>
 
             <div className="space-y-3">
-              {rankedRows.map((row, index) => (
-                <div key={row.id} className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4">
+              {rankedRows.map((row, index) => {
+                const cupStyle = rankCupStyles[index];
+
+                return (
+                <div key={row.id} className={`flex min-h-20 items-center justify-between gap-4 rounded-2xl p-4 ${published && cupStyle ? 'bg-white ring-1 ring-slate-100 shadow-sm' : 'bg-slate-50'}`}>
                   <div className="flex min-w-0 items-center gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-lg font-black text-slate-950 shadow-sm">
-                      {published ? index + 1 : '--'}
+                    <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-black shadow-sm ${published && cupStyle ? cupStyle.className : 'bg-white text-slate-950'}`}>
+                      {published && cupStyle ? (
+                        <img
+                          src={trophyImageUrl}
+                          alt={`Cúp hạng ${cupStyle.label}`}
+                          className={`object-contain drop-shadow-md ${cupStyle.imageClassName}`}
+                          style={cupStyle.imageStyle}
+                        />
+                      ) : published ? index + 1 : '--'}
                     </div>
                     <div className="min-w-0">
                       <div className="truncate font-black text-slate-950">{published ? row.title : 'Chưa công bố'}</div>
-                      <div className="text-sm font-semibold text-slate-500">{published ? 'Điểm tổng' : 'Bấm Công bố để hiển thị thứ hạng'}</div>
+                      <div className="text-sm font-semibold text-slate-500">{published ? (cupStyle ? `Hạng ${cupStyle.label}` : 'Điểm tổng') : 'Bấm Công bố để hiển thị thứ hạng'}</div>
                     </div>
                   </div>
                   <div className="text-2xl font-black text-brand-700">
                     {displayScore(row, 'totalScore')}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         </>

@@ -15,12 +15,11 @@ export default function Home() {
     <section className="relative min-h-[calc(100vh-76px)] overflow-hidden bg-gradient-to-br from-brand-50 via-white to-cyan-50">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-20">
         <div className="flex flex-col justify-center">
-          <span className="mb-5 w-fit rounded-full bg-white px-4 py-2 text-sm font-bold text-brand-700 shadow-sm">Firebase realtime voting</span>
           <h1 className="max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
             Bình chọn trực tuyến, kết quả cập nhật tức thì.
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-            VoteNow dùng Firebase Authentication, Firestore và onSnapshot để tạo trải nghiệm bình chọn realtime không cần backend riêng.
+            ACMEVote - Hệ thống bình chọn nội bộ siêu tốc, minh bạch và chính xác tuyệt đối. Nhìn thấy kết quả hiển thị ngay sau khi bấm.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link

@@ -279,14 +279,15 @@ export default function AdminPolls() {
   };
 
   const handleResetVotes = async (poll) => {
-    const ok = window.confirm(`Reset toàn bộ bình chọn/chấm điểm của poll "${poll.title}"? Poll sẽ trở về trạng thái chưa có lượt gửi nào.`);
+    const ok = window.confirm(`Reset toàn bộ điểm của poll "${poll.title}"? Hành động này sẽ xóa điểm người dùng, BGK và KM.`);
     if (!ok) return;
 
     try {
       const deletedCount = await resetPollVotes(poll.id);
-      toast({ title: 'Đã reset bình chọn', message: `Đã xóa ${deletedCount} lượt gửi của "${poll.title}".` });
+      await updatePoll(poll.id, buildExistingPollPayload(poll, { bgkScores: [], kmScores: [] }));
+      toast({ title: 'Đã reset toàn bộ điểm', message: `Đã xóa ${deletedCount} lượt người dùng, BGK và KM của "${poll.title}".` });
     } catch (err) {
-      toast({ type: 'error', title: 'Không thể reset bình chọn', message: err.message });
+      toast({ type: 'error', title: 'Không thể reset điểm', message: err.message });
     }
   };
 
@@ -423,7 +424,7 @@ export default function AdminPolls() {
                       </button>
                       <button onClick={() => handleResetVotes(poll)} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-50 px-4 py-2.5 text-sm font-black text-amber-700 transition hover:bg-amber-100">
                         <RotateCcw size={16} />
-                        Reset
+                        Reset điểm
                       </button>
                       <button onClick={() => startEdit(poll)} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-50 px-4 py-2.5 text-sm font-black text-brand-700 transition hover:bg-brand-100">
                         <Edit3 size={16} />
