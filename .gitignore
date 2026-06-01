@@ -16,6 +16,7 @@ firebase-debug.log
 firestore-debug.log
 *.log
 tmp-users-import.json
+tmp-vote-users.json
 
 # Editor / OS
 .DS_Store
