@@ -1,7 +1,8 @@
 import { ArrowRight, BarChart3, CheckCircle2, LockKeyhole } from 'lucide-react';
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function PollCard({ poll, userVote = null, onOpen, isAdmin = false }) {
+function PollCard({ poll, userVote = null, onOpen, isAdmin = false }) {
   const isClosed = poll.status === 'closed';
   const type = poll.type || 'vote';
   const submittedLabel = type === 'vote' ? 'Đã bình chọn' : 'Đã chấm điểm';
@@ -97,3 +98,5 @@ export default function PollCard({ poll, userVote = null, onOpen, isAdmin = fals
     </Link>
   );
 }
+
+export default memo(PollCard);

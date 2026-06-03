@@ -4,6 +4,7 @@ import { auth } from '../lib/firebase';
 import { db } from '../lib/firebase';
 
 const SESSION_STORAGE_KEY = 'acmevote_session_id';
+const SESSION_STARTING_KEY = 'acmevote_session_starting_id';
 
 const createSessionId = () => {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID();
@@ -12,19 +13,30 @@ const createSessionId = () => {
 
 export const getCurrentSessionId = () => window.localStorage.getItem(SESSION_STORAGE_KEY);
 
+export const isSessionStarting = () => {
+  const currentSessionId = getCurrentSessionId();
+  return Boolean(currentSessionId && window.sessionStorage.getItem(SESSION_STARTING_KEY) === currentSessionId);
+};
+
 export const clearCurrentSession = () => {
   window.localStorage.removeItem(SESSION_STORAGE_KEY);
+  window.sessionStorage.removeItem(SESSION_STARTING_KEY);
 };
 
 export const startUserSession = async (user) => {
   const sessionId = createSessionId();
   window.localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+  window.sessionStorage.setItem(SESSION_STARTING_KEY, sessionId);
 
-  await updateDoc(doc(db, 'users', user.uid), {
-    activeSessionId: sessionId,
-    activeSessionUpdatedAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
+  try {
+    await updateDoc(doc(db, 'users', user.uid), {
+      activeSessionId: sessionId,
+      activeSessionUpdatedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+  } finally {
+    window.sessionStorage.removeItem(SESSION_STARTING_KEY);
+  }
 
   return sessionId;
 };

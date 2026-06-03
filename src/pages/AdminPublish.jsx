@@ -65,6 +65,7 @@ export default function AdminPublish() {
   const [published, setPublished] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [rollingScores, setRollingScores] = useState({});
+  const pollIdsKey = useMemo(() => polls.map((poll) => poll.id).join('|'), [polls]);
 
   useEffect(() => {
     if (!polls.length) {
@@ -81,7 +82,7 @@ export default function AdminPublish() {
     ));
 
     return () => unsubscribes.forEach((unsubscribe) => unsubscribe());
-  }, [polls]);
+  }, [pollIdsKey]);
 
   const rows = useMemo(() => {
     return polls.map((poll) => {

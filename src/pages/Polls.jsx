@@ -1,22 +1,23 @@
 import { PlusCircle } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import EmptyState from '../components/EmptyState';
 import Loading from '../components/Loading';
 import PollCard from '../components/PollCard';
-import PollVoteModal from '../components/PollVoteModal';
 import { useAuth } from '../hooks/useAuth';
 import { usePolls } from '../hooks/usePolls';
 import { useUserRole } from '../hooks/useUserRole';
 import { useUserPollVotes } from '../hooks/useVotes';
-import AdminPublish from './AdminPublish';
+
+const AdminPublish = lazy(() => import('./AdminPublish'));
+const PollVoteModal = lazy(() => import('../components/PollVoteModal'));
 
 export default function Polls() {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole(user);
   const location = useLocation();
-  const { polls, loading, error } = usePolls(Boolean(user));
-  const { votesByPollId } = useUserPollVotes(isAdmin ? [] : polls, user?.uid);
+  const shouldLoadUserPolls = Boolean(user) && !roleLoading && !isAdmin;
+  const { polls, loading, error } = usePolls(shouldLoadUserPolls);
   const [page, setPage] = useState(1);
   const [selectedPoll, setSelectedPoll] = useState(null);
   const pageSize = 12;
@@ -25,6 +26,7 @@ export default function Polls() {
     const start = (page - 1) * pageSize;
     return polls.slice(start, start + pageSize);
   }, [page, polls]);
+  const { votesByPollId } = useUserPollVotes(isAdmin ? [] : visiblePolls, user?.uid);
 
   useEffect(() => {
     setPage(1);
@@ -35,9 +37,16 @@ export default function Polls() {
   }, [location.pathname, isAdmin]);
 
   const canOpenVoteModal = Boolean(user) && !isAdmin && !roleLoading;
+  const handleOpenPoll = useCallback((poll) => {
+    setSelectedPoll(poll);
+  }, []);
 
   if (!authLoading && user && !roleLoading && isAdmin) {
-    return <AdminPublish />;
+    return (
+      <Suspense fallback={<Loading />}>
+        <AdminPublish />
+      </Suspense>
+    );
   }
 
   return (
@@ -86,7 +95,7 @@ export default function Polls() {
                   poll={poll}
                   userVote={votesByPollId[poll.id]}
                   isAdmin={isAdmin}
-                  onOpen={canOpenVoteModal ? setSelectedPoll : undefined}
+                  onOpen={canOpenVoteModal ? handleOpenPoll : undefined}
                 />
               ))}
             </div>
@@ -120,7 +129,11 @@ export default function Polls() {
         )}
       </div>
 
-      {selectedPoll && canOpenVoteModal && <PollVoteModal poll={selectedPoll} onClose={() => setSelectedPoll(null)} />}
+      {selectedPoll && canOpenVoteModal && (
+        <Suspense fallback={null}>
+          <PollVoteModal poll={selectedPoll} onClose={() => setSelectedPoll(null)} />
+        </Suspense>
+      )}
     </section>
   );
 }

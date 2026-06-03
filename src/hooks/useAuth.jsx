@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { clearCurrentSession, getCurrentSessionId, listenAuthState, listenUserSession, logout } from '../services/authService';
+import { clearCurrentSession, getCurrentSessionId, isSessionStarting, listenAuthState, listenUserSession, logout } from '../services/authService';
 
 const AuthContext = createContext({ user: null, loading: true });
 
@@ -40,6 +40,7 @@ export function AuthProvider({ children }) {
       }
 
       if (activeSessionId && activeSessionId !== currentSessionId) {
+        if (isSessionStarting()) return;
         clearCurrentSession();
         await logout();
       }
