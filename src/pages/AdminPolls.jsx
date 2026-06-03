@@ -45,11 +45,11 @@ const normalizeScoreEntriesForForm = (items = []) => (
     : [createEmptyScoreEntry()]
 );
 
-const normalizeScoreEntriesForSave = (items = [], prefix = 'BGK') => (
+const normalizeScoreEntriesForSave = (items = [], prefix = 'Giám khảo') => (
   items
     .map((item, index) => ({
       id: item.id || makeScoreEntryId(),
-      name: `${prefix}${index + 1}`,
+      name: `${prefix} ${index + 1}`,
       score: Number(item.score),
     }))
     .filter((item) => Number.isFinite(item.score))
@@ -77,7 +77,7 @@ export default function AdminPolls() {
     { label: 'Tổng bình chọn', value: polls.length },
     { label: 'Đang mở', value: polls.filter((poll) => poll.status === 'active').length },
     { label: 'Đã đóng', value: polls.filter((poll) => poll.status === 'closed').length },
-    { label: 'Có điểm BGK/KM', value: polls.filter((poll) => (poll.bgkScores?.length || 0) + (poll.kmScores?.length || 0) > 0).length },
+    { label: 'Có điểm BGK', value: polls.filter((poll) => (poll.bgkScores?.length || 0) + (poll.kmScores?.length || 0) > 0).length },
   ]), [polls]);
 
   useEffect(() => {
@@ -295,8 +295,8 @@ export default function AdminPolls() {
     event.preventDefault();
     if (!scoreModalPoll) return;
 
-    const bgkScores = normalizeScoreEntriesForSave(manualScores.bgk, 'BGK');
-    const kmScores = normalizeScoreEntriesForSave(manualScores.km, 'KM');
+    const bgkScores = normalizeScoreEntriesForSave(manualScores.bgk, 'Giám khảo');
+    const kmScores = normalizeScoreEntriesForSave(manualScores.km, 'Giám khảo');
     const hasInvalidRow = [...manualScores.bgk, ...manualScores.km].some((item) => {
       const hasScore = String(item.score ?? '').trim().length > 0;
       if (!hasScore) return false;
@@ -311,7 +311,7 @@ export default function AdminPolls() {
     setScoreSaving(true);
     try {
       await updatePoll(scoreModalPoll.id, buildExistingPollPayload(scoreModalPoll, { bgkScores, kmScores }));
-      toast({ title: 'Đã lưu điểm BGK/KM', message: scoreModalPoll.title });
+      toast({ title: 'Đã lưu điểm BGK', message: scoreModalPoll.title });
       closeScoreModal();
     } catch (err) {
       toast({ type: 'error', title: 'Không thể lưu điểm', message: err.message });
@@ -328,7 +328,7 @@ export default function AdminPolls() {
             <p className="mb-3 w-fit rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-wide text-cyan-100">Admin dashboard</p>
             <h1 className="text-3xl font-black tracking-tight sm:text-4xl">Quản trị bình chọn</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-200 sm:text-base">
-              Tạo tiết mục, đóng/mở bình chọn, nhập điểm BGK/KM và reset lượt gửi trong một màn hình gọn.
+              Tạo tiết mục, đóng/mở bình chọn, nhập điểm BGK và reset lượt gửi trong một màn hình gọn.
             </p>
           </div>
           <button
@@ -420,7 +420,7 @@ export default function AdminPolls() {
                       </button>
                       <button onClick={() => openScoreModal(poll)} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-50 px-4 py-2.5 text-sm font-black text-cyan-700 transition hover:bg-cyan-100">
                         <Users size={16} />
-                        BGK/KM
+                        BGK
                       </button>
                       <button onClick={() => handleResetVotes(poll)} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-50 px-4 py-2.5 text-sm font-black text-amber-700 transition hover:bg-amber-100">
                         <RotateCcw size={16} />
@@ -518,8 +518,8 @@ export default function AdminPolls() {
 
             <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
               {[
-                { id: 'bgk', label: 'BGK' },
-                { id: 'km', label: 'KM' },
+                { id: 'bgk', label: 'Ban Giám Khảo 1' },
+                { id: 'km', label: 'Ban Giám Khảo 2' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -537,7 +537,7 @@ export default function AdminPolls() {
                 {manualScores[scoreTab].map((entry, index) => (
                   <div key={entry.id} className="grid gap-2 rounded-2xl border border-slate-100 bg-slate-50 p-3 sm:grid-cols-[1fr_160px_auto] sm:items-center">
                     <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700">
-                      {scoreTab === 'bgk' ? `BGK${index + 1}` : `KM${index + 1}`}
+                      {`Giám khảo ${index + 1}`}
                     </div>
                     <input
                       type="number"
@@ -566,7 +566,7 @@ export default function AdminPolls() {
                 className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-2 text-sm font-bold text-brand-700 hover:bg-brand-100"
               >
                 <Plus size={16} />
-                Thêm dòng {scoreTab === 'bgk' ? 'BGK' : 'KM'}
+                Thêm dòng giám khảo
               </button>
 
               <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">

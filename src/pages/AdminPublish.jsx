@@ -149,7 +149,7 @@ export default function AdminPublish() {
           </p>
           <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Công bố kết quả</h1>
           <p className="mt-2 max-w-3xl text-slate-500">
-            Điểm tổng = Khán giả 60% + Ban Giám Khảo 20% + Khách mời 20%. Điểm được ẩn cho tới khi công bố.
+            Điểm tổng = Khán giả 60% + Ban Giám Khảo 1 20% + Ban Giám Khảo 2 20%. Điểm được ẩn cho tới khi công bố.
           </p>
         </div>
         <button
@@ -176,8 +176,8 @@ export default function AdminPublish() {
                   <tr>
                     <th className="px-5 py-4 text-sm font-black">Bình chọn</th>
                     <th className="px-5 py-4 text-center text-sm font-black">Khán giả (60%)</th>
-                    <th className="px-5 py-4 text-center text-sm font-black">Ban Giám Khảo (20%)</th>
-                    <th className="px-5 py-4 text-center text-sm font-black">Khách mời (20%)</th>
+                    <th className="px-5 py-4 text-center text-sm font-black">Ban Giám Khảo 1 (20%)</th>
+                    <th className="px-5 py-4 text-center text-sm font-black">Ban Giám Khảo 2 (20%)</th>
                     <th className="px-5 py-4 text-center text-sm font-black">Tổng</th>
                   </tr>
                 </thead>
