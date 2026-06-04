@@ -5,6 +5,8 @@ import { db } from '../lib/firebase';
 
 const SESSION_STORAGE_KEY = 'acmevote_session_id';
 const SESSION_STARTING_KEY = 'acmevote_session_starting_id';
+const SESSION_ACTIVATING_UNTIL_KEY = 'acmevote_session_activating_until';
+const SESSION_ACTIVATION_GRACE_MS = 8000;
 
 const createSessionId = () => {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID();
@@ -15,18 +17,36 @@ export const getCurrentSessionId = () => window.localStorage.getItem(SESSION_STO
 
 export const isSessionStarting = () => {
   const currentSessionId = getCurrentSessionId();
-  return Boolean(currentSessionId && window.sessionStorage.getItem(SESSION_STARTING_KEY) === currentSessionId);
+  const activatingUntil = Number(window.sessionStorage.getItem(SESSION_ACTIVATING_UNTIL_KEY) || 0);
+
+  return Boolean(
+    currentSessionId
+    && (
+      window.sessionStorage.getItem(SESSION_STARTING_KEY) === currentSessionId
+      || Date.now() < activatingUntil
+    ),
+  );
+};
+
+export const getSessionActivationRemainingMs = () => (
+  Math.max(0, Number(window.sessionStorage.getItem(SESSION_ACTIVATING_UNTIL_KEY) || 0) - Date.now())
+);
+
+export const clearSessionActivation = () => {
+  window.sessionStorage.removeItem(SESSION_STARTING_KEY);
+  window.sessionStorage.removeItem(SESSION_ACTIVATING_UNTIL_KEY);
 };
 
 export const clearCurrentSession = () => {
   window.localStorage.removeItem(SESSION_STORAGE_KEY);
-  window.sessionStorage.removeItem(SESSION_STARTING_KEY);
+  clearSessionActivation();
 };
 
 export const startUserSession = async (user) => {
   const sessionId = createSessionId();
   window.localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
   window.sessionStorage.setItem(SESSION_STARTING_KEY, sessionId);
+  window.sessionStorage.setItem(SESSION_ACTIVATING_UNTIL_KEY, String(Date.now() + SESSION_ACTIVATION_GRACE_MS));
 
   try {
     await updateDoc(doc(db, 'users', user.uid), {
