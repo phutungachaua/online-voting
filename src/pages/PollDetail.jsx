@@ -17,6 +17,8 @@ const typeLabels = {
   score100: 'Chấm điểm thang 100',
 };
 
+const PUBLISH_ROLL_DURATION_MS = 10000;
+
 function getScoreMax(type) {
   return type === 'score100' ? 100 : 10;
 }
@@ -101,7 +103,7 @@ export default function PollDetail() {
       const startedAt = Date.now();
       const interval = window.setInterval(() => {
         const elapsed = Date.now() - startedAt;
-        if (elapsed >= 2000) {
+        if (elapsed >= PUBLISH_ROLL_DURATION_MS) {
           window.clearInterval(interval);
           setRollingScore(averageScore ?? 0);
           setPublishing(false);
@@ -118,7 +120,7 @@ export default function PollDetail() {
       setPublishing(false);
       setPublished(true);
       toast({ title: 'Đã công bố kết quả', message: poll.title });
-    }, 2000);
+    }, PUBLISH_ROLL_DURATION_MS);
   };
 
   return (

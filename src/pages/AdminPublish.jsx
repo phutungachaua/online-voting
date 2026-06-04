@@ -35,6 +35,8 @@ const weightedTotal = ({ audienceScore, bgkScore, kmScore }) => (
   Number((audienceScore * 0.6 + bgkScore * 0.2 + kmScore * 0.2).toFixed(1))
 );
 
+const PUBLISH_ROLL_DURATION_MS = 10000;
+
 const trophyImageUrl = 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Trophy/3D/trophy_3d.png';
 
 const rankCupStyles = [
@@ -119,7 +121,7 @@ export default function AdminPublish() {
     const startedAt = Date.now();
     const interval = window.setInterval(() => {
       const elapsed = Date.now() - startedAt;
-      if (elapsed >= 2000) {
+      if (elapsed >= PUBLISH_ROLL_DURATION_MS) {
         window.clearInterval(interval);
         setPublishing(false);
         setPublished(true);
