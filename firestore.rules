@@ -103,7 +103,7 @@ service cloud.firestore {
       allow update: if isAdmin()
         || (isOwner(userId)
           && request.resource.data.role == resource.data.role
-          && request.resource.data.diff(resource.data).changedKeys().hasOnly(['email', 'displayName', 'updatedAt', 'activeSessionId', 'activeSessionUpdatedAt']));
+          && request.resource.data.diff(resource.data).changedKeys().hasOnly(['email', 'displayName', 'updatedAt']));
       allow delete: if isAdmin();
     }
 
